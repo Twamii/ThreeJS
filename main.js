@@ -91,7 +91,7 @@ window.addEventListener('keyup', (e) => {
 let model, mixer;
 let actions = {};
 let currentAction = null;
-
+let background;
 
 const clock = new THREE.Clock();
 
@@ -99,6 +99,8 @@ const clock = new THREE.Clock();
 const loader = new GLTFLoader();
 loader.load('./models/Animations3.glb', (gltf) => {
   model = gltf.scene;
+  model.scale.set(0.08, 0.08, 0.08);
+  model.position.set(0, -0.065, 0.5);
 
   // Permet de faire en sorte que mon model puisse recevoir des ombres mais ça rend moche, je verrai plus tard
   // model.traverse((child) => {
@@ -115,15 +117,15 @@ loader.load('./models/Animations3.glb', (gltf) => {
   const box = new THREE.Box3().setFromObject(model);
 
   // Ici je récupère le centre et la taille de mon modèle
-  const center = box.getCenter(new THREE.Vector3());
+  // const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
 
   // et ici je recentre la caméra sur mon modèle
-  model.position.sub(center);
+  // model.position.sub(center);
 
-  // pour positionner la caméra plus haut car ça centre mal sur mon modèle 3D
-  camera.position.set(0, size.y * 0.3, size.z * 4);  // Y plus haut, Z en retrait
-  controls.target.set(0, size.y * 0.1, 0); 
+  // pour positionner la caméra
+  camera.position.set(0, size.y * 0.3, size.z * 25);  // Y plus haut, Z en retrait
+  // controls.target.set(0, size.y * 0.1, 0); 
   controls.update();
 
 
@@ -142,11 +144,21 @@ loader.load('./models/Animations3.glb', (gltf) => {
   console.error(error);
 });
 
+// j'importe mon modèle de maison
+const backgroundLoader = new GLTFLoader();
+backgroundLoader.load('./models/house.glb', (gltf) => {
+  background = gltf.scene;
+  background.scale.set(8, 8, 8);
+  background.position.set(0, -0.13, 0);
+  background.rotation.y = Math.PI/2;
+  scene.add(background);
+
+});
 
 // Pour gérer les lumières
 const light = new THREE.DirectionalLight(0xffffff, 2);
-light.position.set(0, 0, 5);
-light.castShadow = true;
+light.position.set(0, 0, 5).normalize;
+// light.castShadow = true;
 scene.add(light);
 
 // const backLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -198,6 +210,7 @@ function animate() {
       const angle = Math.atan2(direction.x, direction.z);
       model.rotation.y = angle;
     }
+    
   }
 
   // pour changer d'animation
